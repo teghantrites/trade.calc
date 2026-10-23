@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Trade Calculator</title>
+<meta name="theme-color" content="#0B0D12">
+<meta name="description" content="Plan position size, stop loss, take profit and risk for stock trades.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Trade Calc">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+:root{--bg:#0B0D12;--s1:#131720;--s2:#1A202B;--tx:#F4F6FA;--mu:#98A2B3;--bd:rgba(255,255,255,.09);--up:#78E0BB;--dn:#FF7D86;--ac:#8FA8FF;
+color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+html{background:#0B0D12;-webkit-text-size-adjust:100%}
+button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.row .inp input{font-size:16px!important}
+@media(pointer:coarse){.chip,.btn,.seg button{min-height:44px}.inp input{min-height:44px}}
+@media(display-mode:standalone){header{padding-top:14px}}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.55 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Inter,system-ui,sans-serif;min-height:100vh;
+background-image:radial-gradient(900px 500px at 12% -5%,rgba(90,110,210,.18),transparent 60%),radial-gradient(700px 480px at 95% 20%,rgba(60,140,150,.10),transparent 60%);background-repeat:no-repeat}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+header{display:flex;align-items:center;justify-content:space-between;padding:22px 0}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:-.01em}
+.brand svg{width:22px;height:22px;stroke:var(--up)}
+.badge{font-size:12px;color:var(--mu);border:1px solid var(--bd);background:rgba(255,255,255,.04);padding:5px 12px;border-radius:99px;backdrop-filter:blur(10px)}
+.hero{padding:56px 0 40px;max-width:720px}
+h1{font-size:clamp(34px,6vw,60px);font-weight:300;letter-spacing:-.035em;line-height:1.05;margin:0 0 18px}
+.hero p{color:var(--mu);font-size:17px;margin:0;max-width:560px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+@media(max-width:860px){.grid{grid-template-columns:1fr}.wrap{padding:0 16px}}
+.panel{background:linear-gradient(180deg,rgba(26,32,43,.72),rgba(19,23,32,.86));border:1px solid var(--bd);border-radius:22px;padding:26px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 20px 50px -20px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.06)}
+.res{background:linear-gradient(160deg,rgba(32,40,66,.78),rgba(15,19,30,.92))}
+.ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.ph h2{font-size:13px;font-weight:500;color:var(--mu);margin:0;letter-spacing:.02em}
+.field{margin-bottom:18px}
+label,.lbl{display:block;font-size:12px;color:var(--mu);margin-bottom:7px;letter-spacing:.03em}
+.inp{display:flex;align-items:center;background:var(--s2);border:1px solid var(--bd);border-radius:12px;transition:border-color .2s,box-shadow .2s;padding:0 14px}
+.inp:focus-within{border-color:rgba(143,168,255,.7);box-shadow:0 0 0 3px rgba(143,168,255,.16)}
+.inp.bad{border-color:var(--dn);box-shadow:0 0 0 3px rgba(255,125,134,.12)}
+.inp span{color:var(--mu);margin-right:6px}
+.inp input{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--tx);font:inherit;font-size:17px;padding:12px 0}
+.inp input::placeholder{color:#5d6675}
+.err{color:var(--dn);font-size:12.5px;margin-top:6px;min-height:0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip,.seg button,.btn{font:inherit;color:var(--tx);cursor:pointer;transition:all .2s}
+.chip{background:rgba(255,255,255,.05);border:1px solid var(--bd);border-radius:10px;padding:8px 13px;font-size:13.5px}
+.chip:hover{background:rgba(255,255,255,.1)}
+.chip.on{background:rgba(143,168,255,.16);border-color:rgba(143,168,255,.55)}
+.row .inp{width:110px;padding:0 10px}.row .inp input{font-size:14px;padding:8px 0}
+.seg{display:grid;grid-template-columns:1fr 1fr;position:relative;background:var(--s2);border:1px solid var(--bd);border-radius:14px;padding:4px}
+.seg i{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:10px;background:rgba(255,255,255,.1);box-shadow:inset 0 1px 0 rgba(255,255,255,.12);transition:transform .28s cubic-bezier(.3,.8,.3,1)}
+.seg.short i{transform:translateX(100%)}
+.seg button{position:relative;background:none;border:0;padding:10px;border-radius:10px;font-size:14.5px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.btn{background:none;border:1px solid var(--bd);border-radius:10px;padding:7px 13px;font-size:13px;color:var(--mu)}
+.btn:hover{color:var(--tx);background:rgba(255,255,255,.06)}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.hint{font-size:12px;color:var(--mu);margin-top:6px}
+.big{font-size:clamp(52px,9vw,76px);font-weight:200;letter-spacing:-.04em;line-height:1}
+.big small{font-size:22px;color:var(--mu);font-weight:300;letter-spacing:0;margin-left:8px}
+.cap{color:var(--mu);font-size:12.5px;margin-top:8px}
+.risk{display:flex;justify-content:space-between;align-items:baseline;margin:22px 0;padding:14px 16px;border:1px solid var(--bd);border-radius:14px;background:rgba(255,255,255,.03)}
+.risk b{font-size:22px;font-weight:500}
+.mets{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--bd);border:1px solid var(--bd);border-radius:14px;overflow:hidden}
+.m{background:#10141d;padding:13px 15px}
+.m .k{font-size:11.5px;color:var(--mu);letter-spacing:.03em}
+.m .v{font-size:18px;font-weight:500;margin-top:2px}
+.up{color:var(--up)}.dn{color:var(--dn)}
+.fade{animation:f .25s ease}
+@keyframes f{from{opacity:.35;transform:translateY(3px)}to{opacity:1;transform:none}}
+.warn{margin-top:14px;font-size:13px;color:#F2C879;border:1px solid rgba(242,200,121,.3);background:rgba(242,200,121,.07);border-radius:12px;padding:10px 13px}
+.empty{padding:34px 4px;color:var(--mu)}
+.empty h3{color:var(--tx);font-weight:400;font-size:22px;margin:0 0 8px;letter-spacing:-.02em}
+.empty.bad h3{color:var(--dn)}
+.link{background:none;border:0;color:var(--ac);font:inherit;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:3px}
+.acc{display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s ease}
+.acc.open{grid-template-rows:1fr}
+.acc>div{overflow:hidden}
+.tg{width:100%;display:flex;justify-content:space-between;align-items:center;background:none;border:0;color:var(--tx);font:inherit;font-size:14px;padding:16px 0 0;cursor:pointer;margin-top:4px}
+.chev{width:18px;height:18px;stroke:var(--mu);transition:transform .25s;flex:none}
+.open-t .chev,.item.open .chev{transform:rotate(180deg)}
+.det{font-size:13.5px;color:var(--mu);padding-top:12px}
+.det div{display:flex;justify-content:space-between;gap:14px;padding:7px 0;border-bottom:1px solid var(--bd)}
+.det div span:last-child{color:var(--tx);text-align:right}
+h2.sec{font-size:26px;font-weight:300;letter-spacing:-.02em;margin:64px 0 18px}
+.item{border:1px solid var(--bd);border-radius:16px;background:rgba(19,23,32,.7);margin-bottom:10px;overflow:hidden}
+.item button.q{width:100%;display:flex;align-items:center;gap:14px;background:none;border:0;color:var(--tx);font:inherit;font-size:15.5px;text-align:left;padding:16px 18px;cursor:pointer}
+.item button.q:hover{background:rgba(255,255,255,.03)}
+.ic{width:30px;height:30px;border-radius:9px;background:var(--s2);border:1px solid var(--bd);display:grid;place-items:center;color:var(--ac);font-size:14px;flex:none}
+.item .q .t{flex:1}
+.ans{padding:2px 18px 18px 62px;color:var(--mu);font-size:14.5px}
+.ans p{margin:0 0 10px}
+.ans code{background:var(--s2);border:1px solid var(--bd);padding:2px 7px;border-radius:6px;color:var(--tx);font-size:13px}
+footer{margin:56px 0 40px;padding-top:22px;border-top:1px solid var(--bd);color:var(--mu);font-size:13px}
+@media(prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+ <div class="brand"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>Trade Calculator</div>
+</header>
+<section class="hero">
+ <h1>Plan your trade.<br>Know your risk.</h1>
+ <p>Calculate position size, stop loss, take profit, and potential outcomes. Build a trading plan around your risk limits.</p>
+</section>
+
+<main class="grid">
+ <section class="panel" aria-label="Trade inputs">
+  <div class="ph"><h2>Trade inputs</h2><div class="row"><button class="btn" id="reset" type="button">Reset</button></div></div>
+  <div class="field"><label for="bal">Account balance (USD)</label>
+   <div class="inp" id="w-bal"><span>$</span><input id="bal" inputmode="decimal" autocomplete="off"></div><div class="err" id="e-bal"></div></div>
+
+  <div class="field"><div class="lbl">Risk per trade</div>
+   <div class="row" id="riskChips"></div>
+   <div class="row" style="margin-top:8px"><div class="inp" id="w-risk"><input id="risk" inputmode="decimal" aria-label="Custom risk percentage" autocomplete="off"><span>%</span></div><span class="hint" id="budget" style="margin:0"></span></div>
+   <div class="err" id="e-risk"></div></div>
+
+  <div class="field"><div class="lbl">Direction</div>
+   <div class="seg" id="seg"><i></i><button type="button" data-d="long">Long</button><button type="button" data-d="short">Short</button></div></div>
+
+  <div class="two">
+   <div class="field"><label for="entry">Entry price</label><div class="inp" id="w-entry"><span>$</span><input id="entry" inputmode="decimal" placeholder="50.00" autocomplete="off"></div><div class="err" id="e-entry"></div></div>
+   <div class="field"><label for="stop">Stop-loss price</label><div class="inp" id="w-stop"><span>$</span><input id="stop" inputmode="decimal" placeholder="49.00" autocomplete="off"></div><div class="err" id="e-stop"></div></div>
+  </div>
+
+  <div class="field"><div class="lbl">Reward-to-risk</div>
+   <div class="row" id="rrChips"></div>
+   <div class="row" style="margin-top:8px"><div class="inp" id="w-rr"><span>1 :</span><input id="rr" inputmode="decimal" aria-label="Custom reward multiple" autocomplete="off"></div></div>
+   <div class="err" id="e-rr"></div></div>
+
+  <div class="field" id="bpField" style="display:none;margin-bottom:0"><label for="bp">Short buying power (optional)</label>
+   <div class="inp" id="w-bp"><span>$</span><input id="bp" inputmode="decimal" placeholder="Leave blank if unknown" autocomplete="off"></div>
+   <div class="hint">Short-selling limits depend on your broker. Without a value, share count is based on risk only.</div><div class="err" id="e-bp"></div></div>
+ </section>
+
+ <section class="panel res" aria-label="Results" aria-live="polite"><div id="out"></div></section>
+</main>
+
+<h2 class="sec">How the numbers work</h2>
+<div id="faq"></div>
+
+<footer>Educational tool only. Calculations are estimates and do not guarantee execution prices or trading outcomes.</footer>
+</div>
+
+<script>
+(function(){
+var MAX_RISK=10;
+var DEF={bal:'1000',risk:'2',dir:'long',entry:'',stop:'',rr:'2',bp:''};
+var st=Object.assign({},DEF), detOpen=false;
+var $=function(i){return document.getElementById(i)};
+var usd=function(n,sign){var s=Math.abs(n).toLocaleString('en-US',{style:'currency',currency:'USD'});return sign?(n<0?'\u2212':'+')+s:(n<0?'\u2212'+s:s)};
+var num=function(s){s=String(s).replace(/[$,\s]/g,'');if(s==='')return NaN;var v=Number(s);return isFinite(v)?v:NaN};
+var tidy=function(n){return String(+n.toFixed(2))};
+var blank=function(s){return String(s).trim()===''};
+
+function calc(){
+ var e={},A=num(st.bal),p=num(st.risk),E=num(st.entry),S=num(st.stop),R=num(st.rr),bp=num(st.bp),L=st.dir==='long';
+ if(blank(st.bal)||!(A>0))e.bal='Enter a balance above $0.';
+ if(blank(st.risk)||!(p>0))e.risk='Enter a risk above 0%.';else if(p>MAX_RISK)e.risk='Risk is capped at '+MAX_RISK+'% in this tool.';
+ if(blank(st.rr)||!(R>0))e.rr='Enter a reward multiple above 0.';
+ if(!blank(st.entry)&&!(E>0))e.entry='Enter a price above $0.';
+ if(!blank(st.stop)&&!(S>0))e.stop='Enter a price above $0.';
+ if(!blank(st.bp)&&!(bp>0))e.bp='Enter an amount above $0, or leave blank.';
+ if(E>0&&S>0){
+  if(E===S)e.stop='Stop must differ from entry.';
+  else if(L&&S>E)e.stop='For a long, the stop must be below entry.';
+  else if(!L&&S<E)e.stop='For a short, the stop must be above entry.';
+ }
+ var missing=blank(st.entry)||blank(st.stop);
+ if(Object.keys(e).length||missing)return{e:e,missing:missing&&!Object.keys(e).length};
+ var rb=A*(p/100),rps=Math.abs(E-S),rbs=Math.floor(rb/rps),tp=L?E+R*rps:E-R*rps;
+ if(tp<=0){e.rr='Target would fall at or below $0. Lower the multiple.';return{e:e}}
+ var lim=null,limLabel;
+ if(L){lim=Math.floor(A/E);limLabel='cash'}else if(bp>0){lim=Math.floor(bp/E);limLabel='buying power'}
+ var Q=lim===null?rbs:Math.min(rbs,lim);
+ return{ok:1,L:L,A:A,p:p,E:E,S:S,R:R,rb:rb,rps:rps,rbs:rbs,tp:tp,lim:lim,Q:Q,pv:Q*E,loss:Q*rps,profit:Q*R*rps,
+  ratio:Math.abs(tp-E)/rps,capped:lim!==null&&rbs>lim,limLabel:limLabel,e:e};
+}
+
+function out(c){
+ var o=$('out');
+ if(c.missing){o.innerHTML='<div class="empty fade"><h3>Enter your trade details</h3>Input your entry and stop-loss prices to see your trade.</div>';return}
+ if(!c.ok){o.innerHTML='<div class="empty bad fade"><h3>Fix the highlighted inputs</h3>Results stay hidden until the trade setup is valid.</div>';return}
+ var warn='';
+ if(c.capped)warn+='<div class="warn">Risk allows '+c.rbs.toLocaleString()+' shares, but your '+c.limLabel+' limits you to '+c.lim.toLocaleString()+'.</div>';
+ if(!c.L&&c.lim===null)warn+='<div class="warn">Short share count is risk-based only. Broker margin and short-selling requirements have not been verified.</div>';
+ if(c.Q===0)warn+='<div class="warn">'+(c.rbs===0?'Your risk budget of '+usd(c.rb)+' is less than the '+usd(c.rps)+' risk on one share. Widen your risk budget or tighten the stop.':'One share costs more than your available '+c.limLabel+'.')+'</div>';
+ var ratio='1:'+tidy(c.ratio);
+ var aff=c.L?c.lim.toLocaleString():(c.lim===null?'Not verified':c.lim.toLocaleString());
+ var m=function(k,v,cls){return '<div class="m"><div class="k">'+k+'</div><div class="v num '+(cls||'')+'">'+v+'</div></div>'};
+ o.innerHTML='<div class="fade">'+
+ '<div class="lbl">Calculated position size</div><div class="big num">'+c.Q.toLocaleString()+'<small>'+(c.Q===1?'share':'shares')+' '+(c.L?'long':'short')+'</small></div>'+
+ '<div class="risk"><span class="lbl" style="margin:0">Dollar risk budget</span><b class="num">'+usd(c.rb)+'</b></div>'+
+ '<div class="mets">'+m('Entry',usd(c.E))+m('Stop-loss',usd(c.S))+m('Take-profit',usd(c.tp),'up')+m('Risk per share',usd(c.rps))+
+ m('Potential profit \u25B2',usd(c.profit,1),'up')+m('Potential loss \u25BC',usd(-c.loss,1),'dn')+
+ m('Position value',usd(c.pv))+m('Reward-to-risk',ratio)+m(c.L?'Max affordable shares':'Max shares by buying power',aff)+m('Risk-based shares',c.rbs.toLocaleString())+'</div>'+warn+
+ '<button class="tg'+(detOpen?' open-t':'')+'" id="tg" type="button" aria-expanded="'+detOpen+'"><span>View calculation details</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button>'+
+ '<div class="acc'+(detOpen?' open':'')+'" id="dt"><div><div class="det">'+
+ d('Risk budget',usd(c.A)+' \u00D7 '+tidy(c.p)+'% = '+usd(c.rb))+
+ d('Risk per share','|'+usd(c.E)+' \u2212 '+usd(c.S)+'| = '+usd(c.rps))+
+ d('Risk-based shares','floor('+usd(c.rb)+' \u00F7 '+usd(c.rps)+') = '+c.rbs.toLocaleString())+
+ d('Buying-power limit',c.lim===null?'Not applied (unverified)':'floor('+usd(c.L?c.A:num(st.bp))+' \u00F7 '+usd(c.E)+') = '+c.lim.toLocaleString())+
+ d('Final shares','min of the limits = '+c.Q.toLocaleString())+
+ d('Take-profit',usd(c.E)+(c.L?' + ':' \u2212 ')+tidy(c.R)+' \u00D7 '+usd(c.rps)+' = '+usd(c.tp))+
+ d('Profit at target',c.Q.toLocaleString()+' \u00D7 '+usd(c.R*c.rps)+' = '+usd(c.profit,1))+
+ d('Loss at stop',c.Q.toLocaleString()+' \u00D7 '+usd(c.rps)+' = '+usd(-c.loss,1))+
+ '</div></div></div></div>';
+ $('tg').onclick=function(){detOpen=!detOpen;$('dt').classList.toggle('open',detOpen);this.classList.toggle('open-t',detOpen);this.setAttribute('aria-expanded',detOpen)};
+}
+function d(a,b){return '<div><span>'+a+'</span><span class="num">'+b+'</span></div>'}
+
+function sync(){
+ var c=calc();
+ ['bal','risk','entry','stop','rr','bp'].forEach(function(k){
+  var msg=c.e[k]||'';$('e-'+k).textContent=msg;$('w-'+k).classList.toggle('bad',!!msg)});
+ var A=num(st.bal),p=num(st.risk);
+ $('budget').textContent=(A>0&&p>0)?'= '+usd(A*p/100)+' at risk':'';
+ [].forEach.call($('riskChips').children,function(b){b.classList.toggle('on',num(b.dataset.v)===p)});
+ [].forEach.call($('rrChips').children,function(b){b.classList.toggle('on',num(b.dataset.v)===num(st.rr))});
+ $('seg').classList.toggle('short',st.dir==='short');
+ [].forEach.call($('seg').querySelectorAll('button'),function(b){b.setAttribute('aria-pressed',b.dataset.d===st.dir)});
+ $('bpField').style.display=st.dir==='short'?'block':'none';
+ out(c);
+}
+function fill(){['bal','risk','entry','stop','rr','bp'].forEach(function(k){$(k).value=st[k]})}
+function example(){st.entry='50';st.stop=st.dir==='long'?'49':'51';fill();sync()}
+
+['bal','risk','entry','stop','rr','bp'].forEach(function(k){$(k).addEventListener('input',function(){st[k]=this.value;sync()})});
+$('bal').addEventListener('blur',function(){var v=num(this.value);if(v>0){st.bal=String(v);this.value=v.toLocaleString('en-US')}});
+[['riskChips','risk',['0.5','1','2'],function(v){return v+'%'}],['rrChips','rr',['1','1.5','2','3'],function(v){return '1:'+v}]].forEach(function(x){
+ x[2].forEach(function(v){var b=document.createElement('button');b.type='button';b.className='chip';b.dataset.v=v;b.textContent=x[3](v);
+  b.onclick=function(){st[x[1]]=v;$(x[1]).value=v;sync()};$(x[0]).appendChild(b)})});
+[].forEach.call($('seg').querySelectorAll('button'),function(b){b.onclick=function(){st.dir=b.dataset.d;sync()}});
+$('reset').onclick=function(){st=Object.assign({},DEF);detOpen=false;fill();$('bal').value='1,000';sync()};
+
+var FAQ=[
+['\u00F7','How is my position size calculated?','<p>The calculator divides the dollars you are willing to risk by the amount one share loses if your stop is hit, then rounds down to a whole share.</p><p>Example: <code>$20 risk budget \u00F7 $1 risk per share = 20 shares</code>.</p><p>Buying power can lower that number. For a long, the final size is the smaller of the risk-based quantity and the shares your cash can buy.</p>'],
+['\u25CE','How is my take-profit price calculated?','<p>It takes the distance between entry and stop, multiplies it by your reward multiple, and adds that distance to entry for a long or subtracts it for a short.</p><p>Long example: <code>$50 + (2 \u00D7 $1) = $52</code>. Short example: <code>$50 \u2212 (2 \u00D7 $1) = $48</code>.</p>'],
+['\u21C5','What does the reward-to-risk ratio mean?','<p>A 1:2 ratio means the planned profit at your target is twice the planned loss at your stop, if both exits fill at those prices.</p><p>It does not make a trade profitable. Fills, costs, and how often your trades reach the target all matter.</p>'],
+['$','How is my maximum affordable position size calculated?','<p>For a cash-only long, your balance is divided by the entry price and rounded down to a whole share.</p><p>Example: <code>floor($1,000 \u00F7 $50) = 20 shares</code>. Your broker\u2019s actual buying power may differ, so treat this as an estimate.</p>'],
+['!','Why can my actual loss exceed my planned risk?','<p>A stop price is a trigger, not a guaranteed fill. If the stock gaps past it overnight or moves fast, a stop-market order fills at the next available price, which can be worse than your stop.</p><p>Commissions, fees, and slippage add to the loss. The planned risk is a target, not a cap.</p>']];
+var f=$('faq');
+FAQ.forEach(function(x,i){
+ var it=document.createElement('div');it.className='item';
+ it.innerHTML='<button class="q" type="button" aria-expanded="false" aria-controls="a'+i+'"><span class="ic" aria-hidden="true">'+x[0]+'</span><span class="t">'+x[1]+'</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button><div class="acc" id="a'+i+'"><div><div class="ans">'+x[2]+'</div></div></div>';
+ it.querySelector('.q').onclick=function(){var o=!it.classList.contains('open');it.classList.toggle('open',o);it.querySelector('.acc').classList.toggle('open',o);this.setAttribute('aria-expanded',o)};
+ f.appendChild(it)});
+fill();$('bal').value='1,000';sync();
+})();
+</script>
+<script>
+if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){
+ window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
+}
+</script>
+</body>
+</html>
